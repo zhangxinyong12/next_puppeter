@@ -1,113 +1,76 @@
-import Image from "next/image";
+"use client"
+import { sleep } from "@/utils"
+import { Button } from "antd"
+import Image from "next/image"
+import { useState } from "react"
 
 export default function Home() {
+  const [imgBase64, setImgBase64] = useState<string>()
+  const [urls, setUrls] = useState<string[]>([
+    "https://www.xiaohongshu.com/explore/66403829000000001e01f035",
+    "https://www.xiaohongshu.com/explore/6651800800000000050047f0",
+    "https://www.xiaohongshu.com/explore/663c5a6a000000001e0277e5",
+    "https://www.xiaohongshu.com/explore/664d87270000000016010900",
+  ])
+  const [dataList, setDataList] = useState<
+    { like: number; collect: number; reds: number; url: string }[]
+  >([])
+  async function handleClick() {
+    setDataList([])
+    console.log("click")
+    for (let i = 0; i < urls.length; i++) {
+      await fetch("/api/byUrlData", {
+        method: "POST",
+        body: JSON.stringify({
+          url: "https://www.xiaohongshu.com/explore/66403829000000001e01f035",
+          type: "XHS",
+          cookie:
+            "abRequestId=0b14aacd-ffad-5254-add6-163c2bd3048f; xsecappid=xhs-pc-web; a1=18d789359327lirq5g7dpwz2eaxl9lxn9yi8zkb7d50000394916; webId=c8ddef3b93dcee0277c654a6c01f506d; gid=yYfWYjqKKYjSyYfWYjq2jvTDqJW13FA2kWfU3WfEuJd0CY281j1CIu888qj4jyK80j4Kqqy2; customerClientId=952063472484810; customer-sso-sid=6647379b360000000000000503557889911bcdd8; x-user-id-ad.xiaohongshu.com=658539566100000000000003; webBuild=4.18.0; acw_tc=4765482f1f24265a4d6e1e0b7edeb0e57e9d9d895dd4e0cf4f36b5974f94afe1; websectiga=6169c1e84f393779a5f7de7303038f3b47a78e47be716e7bec57ccce17d45f99; sec_poison_id=970cd17b-f1e8-46f1-bc28-eb86141fb807; web_session=0400698f6e15a2566921a7256c344b444f07bd",
+          // "a1=18d789359327lirq5g7dpwz2eaxl9lxn9yi8zkb7d50000394916; webId=c8ddef3b93dcee0277c654a6c01f506d; web_session=0400698f6e15a2566921a7256c344b444f07bd",
+        }),
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          console.log(res)
+          setDataList((vals) => [
+            {
+              like: res.data.like,
+              collect: res.data.collect,
+              reds: res.data.reds,
+              url: res.data.url,
+            },
+            ...vals,
+          ])
+
+          return Promise.resolve(res.data)
+        })
+
+      await sleep(1500)
+    }
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main>
+      <div className="flex gap-4">
+        <Button onClick={handleClick}>测试</Button>
+        <Button type="primary">测试2</Button>
+      </div>
+      {/* <div className="w-[1920px] overflow-y-auto"> */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* <img src={`data:image/png;base64,${imgBase64}`} width={1920} alt="" /> */}
+      {/* </div> */}
+      {
+        <div>
+          {dataList.map((data, index) => (
+            <div className="flex gap-4" key={data.url}>
+              <span>链接地址：{data.url}</span>
+              <span>点赞：{data.like}</span>
+              <span>收藏：{data.collect}</span>
+              <span>评论：{data.reds}</span>
+            </div>
+          ))}
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      }
     </main>
-  );
+  )
 }
